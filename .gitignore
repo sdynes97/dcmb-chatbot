@@ -22,6 +22,16 @@ package-lock.json
 .DS_Store
 Thumbs.db
 
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+infra/tfplan
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/override.tf
+infra/override.tf.json
+
 # IDE
 .vscode/
 .idea/
