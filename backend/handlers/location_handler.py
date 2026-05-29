@@ -5,6 +5,7 @@ import os
 import azure.functions as func
 
 import services.location_service as location_service
+import services.eta_service as eta_service
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,51 @@ def handle(req: func.HttpRequest) -> func.HttpResponse:
     elif req.method == "DELETE":
         return _clear_eta(req)
     return func.HttpResponse("Method Not Allowed", status_code=405)
+
+
+def handle_track(req: func.HttpRequest) -> func.HttpResponse:
+    """Receive GPS coordinates from the director's browser and auto-calculate ETA."""
+    if not _is_authorized(req):
+        return func.HttpResponse("Unauthorized", status_code=401)
+
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    try:
+        lat = float(body["lat"])
+        lng = float(body["lng"])
+    except (KeyError, TypeError, ValueError):
+        return func.HttpResponse(
+            json.dumps({"error": "lat and lng are required numbers"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    try:
+        result = eta_service.calculate_eta(lat, lng)
+        eta = location_service.set_eta(
+            message=result["message"],
+            eta_time=result["eta_iso"],
+        )
+    except Exception:
+        logger.exception("Failed to calculate/store ETA")
+        return func.HttpResponse(
+            json.dumps({"error": "Failed to update ETA"}),
+            status_code=500,
+            mimetype="application/json",
+        )
+
+    return func.HttpResponse(
+        json.dumps({"status": "ok", "eta": result}),
+        status_code=200,
+        mimetype="application/json",
+    )
 
 
 def _get_eta(req: func.HttpRequest) -> func.HttpResponse:

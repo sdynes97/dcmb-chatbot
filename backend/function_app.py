@@ -23,3 +23,8 @@ def admin_events(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="location", methods=["GET", "POST", "DELETE"])
 def location(req: func.HttpRequest) -> func.HttpResponse:
     return location_handler.handle(req)
+
+
+@app.route(route="location/track", methods=["POST"])
+def location_track(req: func.HttpRequest) -> func.HttpResponse:
+    return location_handler.handle_track(req)

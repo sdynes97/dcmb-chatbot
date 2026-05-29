@@ -196,6 +196,14 @@
     .checkbox-row input { width: auto; margin: 0; }
     .checkbox-row label { margin: 0; font-size: 0.9rem; }
 
+    /* ── Live tracking status ────────────────────────────────────── */
+    .tracking-idle   { color: #888; font-size: 0.85rem; margin-bottom: 10px; }
+    .tracking-active { color: #1a7a2e; font-size: 0.85rem; margin-bottom: 10px;
+                       font-weight: 600; }
+    .tracking-error  { color: #c0392b; font-size: 0.85rem; margin-bottom: 10px; }
+    details summary  { outline: none; }
+    details[open] summary { margin-bottom: 12px; }
+
     /* ── Logout button ───────────────────────────────────────────── */
     .topbar {
       display: flex;
@@ -254,17 +262,40 @@
       <div class="card">
         <h2>🚌 Bus ETA Update</h2>
         <div id="eta-current" class="eta-current none">No ETA update set</div>
-        <form id="eta-form">
-          <label for="eta_message">Update Message</label>
-          <input type="text" id="eta_message" name="eta_message"
-            placeholder="e.g. Leaving Lincoln now, home ~10:30pm"
-            autocomplete="off" required />
-          <label for="eta_time">Estimated Arrival (optional)</label>
-          <div class="eta-row">
-            <input type="time" id="eta_time" name="eta_time" />
-            <button type="submit" class="btn btn-gold">Post Update</button>
+
+        <!-- Live GPS tracking -->
+        <div id="tracking-section">
+          <div id="tracking-status" class="tracking-idle">
+            📍 Live tracking inactive
           </div>
-        </form>
+          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+            <button id="start-tracking-btn" class="btn btn-primary">
+              Start Live Tracking
+            </button>
+            <button id="stop-tracking-btn" class="btn btn-outline" style="display:none">
+              Stop Tracking
+            </button>
+          </div>
+        </div>
+
+        <!-- Manual override -->
+        <details id="manual-eta-details">
+          <summary style="cursor:pointer;font-size:0.85rem;color:#555;margin-bottom:10px;user-select:none">
+            Or post a manual update…
+          </summary>
+          <form id="eta-form">
+            <label for="eta_message">Message</label>
+            <input type="text" id="eta_message" name="eta_message"
+              placeholder="e.g. Leaving Lincoln now, home ~10:30pm"
+              autocomplete="off" required />
+            <label for="eta_time">Estimated Arrival (optional)</label>
+            <div class="eta-row">
+              <input type="time" id="eta_time" name="eta_time" />
+              <button type="submit" class="btn btn-gold">Post</button>
+            </div>
+          </form>
+        </details>
+
         <div style="margin-top:12px">
           <button id="clear-eta-btn" class="btn btn-outline btn-sm">Clear ETA</button>
         </div>

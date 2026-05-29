@@ -291,6 +291,115 @@ async function deleteEvent(partitionKey, rowKey) {
   loadEvents();
 }
 
+// ── Live GPS Tracking ─────────────────────────────────────────────────────────
+
+let _trackingInterval = null;
+let _watchId = null;
+let _lastSent = null;
+
+const trackingStatus  = document.getElementById("tracking-status");
+const startTrackingBtn = document.getElementById("start-tracking-btn");
+const stopTrackingBtn  = document.getElementById("stop-tracking-btn");
+
+startTrackingBtn.addEventListener("click", startTracking);
+stopTrackingBtn.addEventListener("click", stopTracking);
+
+function startTracking() {
+  if (!("geolocation" in navigator)) {
+    setTrackingStatus("error", "❌ This browser does not support location sharing.");
+    return;
+  }
+
+  setTrackingStatus("active", "📍 Requesting location permission…");
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      sendLocation(pos);
+      // Send an update every 30 seconds
+      _trackingInterval = setInterval(() => {
+        navigator.geolocation.getCurrentPosition(sendLocation, onGeoError, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+      }, 30000);
+
+      startTrackingBtn.style.display = "none";
+      stopTrackingBtn.style.display  = "inline-flex";
+    },
+    onGeoError,
+    { enableHighAccuracy: true, timeout: 15000 },
+  );
+}
+
+function stopTracking() {
+  clearInterval(_trackingInterval);
+  _trackingInterval = null;
+  if (_watchId !== null) {
+    navigator.geolocation.clearWatch(_watchId);
+    _watchId = null;
+  }
+  setTrackingStatus("idle", "📍 Live tracking stopped.");
+  startTrackingBtn.style.display = "inline-flex";
+  stopTrackingBtn.style.display  = "none";
+}
+
+async function sendLocation(pos) {
+  const { latitude: lat, longitude: lng } = pos.coords;
+  try {
+    const r = await fetch(`${API_BASE_URL}/location/track`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ lat, lng }),
+    });
+    if (!r.ok) { setTrackingStatus("error", "❌ Failed to send location. Check your key."); return; }
+    const data = await r.json();
+    _lastSent = new Date();
+    const timeStr = _lastSent.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    setTrackingStatus("active",
+      `📍 Tracking active — ${data.eta.distance_mi} mi from school, ` +
+      `ETA ~${fmtTime(data.eta.eta_iso)} (updated ${timeStr})`
+    );
+    loadETA();
+  } catch {
+    setTrackingStatus("error", "❌ Network error — will retry in 30s.");
+  }
+}
+
+function onGeoError(err) {
+  const msgs = {
+    1: "Location permission denied. Please allow location access and try again.",
+    2: "Location unavailable. Are you indoors?",
+    3: "Location request timed out. Will retry.",
+  };
+  setTrackingStatus("error", "❌ " + (msgs[err.code] || "Location error."));
+}
+
+function setTrackingStatus(state, text) {
+  trackingStatus.textContent = text;
+  trackingStatus.className = `tracking-${state}`;
+}
+
+function fmtTime(isoStr) {
+  return new Date(isoStr).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+// Stop tracking automatically if the page is hidden (phone screen off / tab switched)
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && _trackingInterval) {
+    setTrackingStatus("active",
+      "⏸ Screen locked — tracking paused. Return to this page to resume."
+    );
+    clearInterval(_trackingInterval);
+    _trackingInterval = null;
+  } else if (!document.hidden && stopTrackingBtn.style.display !== "none") {
+    // Page is visible again and tracking was active — resume
+    setTrackingStatus("active", "📍 Tracking resumed…");
+    startTracking();
+    startTrackingBtn.style.display = "none";
+    stopTrackingBtn.style.display  = "inline-flex";
+  }
+});
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function today() {

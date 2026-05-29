@@ -105,6 +105,9 @@ resource "azurerm_linux_function_app" "main" {
     "TELNYX_PHONE_NUMBER" = var.telnyx_phone_number
     "ADMIN_API_KEY"       = var.admin_api_key
     "DIRECTOR_PHONE"      = var.director_phone
+    "SCHOOL_LAT"          = var.school_lat
+    "SCHOOL_LNG"          = var.school_lng
+    "AVG_SPEED_MPH"       = var.avg_speed_mph
   }
 
   lifecycle {
