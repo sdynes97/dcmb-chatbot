@@ -127,18 +127,19 @@ In the repo → Settings → Pages → Source: **Deploy from branch** → `gh-pa
 
 Open a PowerShell terminal in the repo root.
 
-**1. Install Azure Functions Core Tools and Azurite (once)**
+**1. Install Azure Functions Core Tools (once)**
 ```powershell
-npm install -g azure-functions-core-tools@4
-npm install -g azurite
+winget install Microsoft.Azure.FunctionsCoreTools
 ```
+Restart your terminal after install so `func` is on your PATH.
 
-**2. Start Azurite (local Table Storage emulator) — keep this terminal open**
-```powershell
-$azuriteData = "$env:TEMP\azurite"
-New-Item -ItemType Directory -Force -Path $azuriteData | Out-Null
-azurite --silent --location $azuriteData
-```
+**2. Start Azurite (local Table Storage emulator)**
+
+Azurite is built into the **VS Code Azurite extension** — the easiest option, no extra install:
+1. Open VS Code → Extensions → search **Azurite** (publisher: Microsoft) → Install
+2. Open the Command Palette (`Ctrl+Shift+P`) → **Azurite: Start**
+
+A status bar item shows `[Azurite Table Service]` when it's running. That's all you need.
 
 **3. Install Python dependencies**
 ```powershell
