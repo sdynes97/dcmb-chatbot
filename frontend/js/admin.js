@@ -35,7 +35,7 @@ function signIn(key) {
 // Auto sign-in if a saved key exists
 const saved = loadSavedKey();
 if (saved) {
-  fetch(`${API_BASE_URL}/admin/events`, {
+  fetch(`${API_BASE_URL}/schedule/events`, {
     headers: { "X-Admin-Key": saved },
   }).then((r) => {
     if (r.ok) signIn(saved);
@@ -46,7 +46,7 @@ document.getElementById("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const key = document.getElementById("api-key").value.trim();
   if (!key) return;
-  const r = await fetch(`${API_BASE_URL}/admin/events`, {
+  const r = await fetch(`${API_BASE_URL}/schedule/events`, {
     headers: { "X-Admin-Key": key },
   });
   if (r.status === 401) { toast("Invalid access key.", true); return; }
@@ -120,7 +120,7 @@ document.getElementById("clear-eta-btn").addEventListener("click", async () => {
 let _allEvents = [];
 
 async function loadEvents() {
-  const r = await fetch(`${API_BASE_URL}/admin/events`, { headers: authHeaders() });
+  const r = await fetch(`${API_BASE_URL}/schedule/events`, { headers: authHeaders() });
   _allEvents = await r.json();
   renderDesktopTable(_allEvents);
   renderMobileCards(_allEvents);
@@ -229,7 +229,7 @@ async function saveMobileCard(rk) {
   btn.disabled = true;
   btn.textContent = "Saving…";
   try {
-    const r = await fetch(`${API_BASE_URL}/admin/events`, {
+    const r = await fetch(`${API_BASE_URL}/schedule/events`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify(updated),
@@ -289,7 +289,7 @@ document.getElementById("event-form").addEventListener("submit", async (e) => {
   const btn = document.getElementById("save-event-btn");
   btn.disabled = true;
   try {
-    const r = await fetch(`${API_BASE_URL}/admin/events`, {
+    const r = await fetch(`${API_BASE_URL}/schedule/events`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -305,7 +305,7 @@ document.getElementById("event-form").addEventListener("submit", async (e) => {
 async function deleteEvent(partitionKey, rowKey) {
   if (!confirm("Delete this event? This cannot be undone.")) return;
   const r = await fetch(
-    `${API_BASE_URL}/admin/events?partition_key=${encodeURIComponent(partitionKey)}&row_key=${encodeURIComponent(rowKey)}`,
+    `${API_BASE_URL}/schedule/events?partition_key=${encodeURIComponent(partitionKey)}&row_key=${encodeURIComponent(rowKey)}`,
     { method: "DELETE", headers: authHeaders() }
   );
   if (!r.ok) { toast("Failed to delete.", true); return; }

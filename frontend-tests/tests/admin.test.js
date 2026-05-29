@@ -67,7 +67,7 @@ afterEach(() => {
 
 test("valid key reveals admin content", async () => {
   fetch.mockImplementation((url) => {
-    if (url.includes("/admin/events")) {
+    if (url.includes("/schedule/events")) {
       return Promise.resolve({ ok: true, status: 200, json: async () => [] });
     }
     // GET /location
@@ -101,7 +101,7 @@ test("invalid key shows error toast and stays signed out", async () => {
 test("remembered key auto signs in on load", async () => {
   localStorage.setItem("dcmb_admin_key", "saved-key");
   fetch.mockImplementation((url) => {
-    if (url.includes("/admin/events")) {
+    if (url.includes("/schedule/events")) {
       return Promise.resolve({ ok: true, status: 200, json: async () => [] });
     }
     return Promise.resolve({ ok: true, json: async () => ({ eta: null }) });

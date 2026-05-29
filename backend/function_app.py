@@ -10,7 +10,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     return chat_handler.handle(req)
 
 
-@app.route(route="admin/events", methods=["GET", "POST", "DELETE"])
+@app.route(route="schedule/events", methods=["GET", "POST", "DELETE"])
 def admin_events(req: func.HttpRequest) -> func.HttpResponse:
     return admin_handler.handle_events(req)
 
