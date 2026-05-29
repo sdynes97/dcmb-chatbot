@@ -1,9 +1,5 @@
-import hashlib
-import hmac
-import json
 import os
 import time
-from typing import Optional
 
 import requests
 
@@ -12,6 +8,10 @@ _TELNYX_PUBLIC_KEY = os.environ.get("TELNYX_PUBLIC_KEY", "")
 _TELNYX_PHONE = os.environ.get("TELNYX_PHONE_NUMBER", "")
 
 _MESSAGES_URL = "https://api.telnyx.com/v2/messages"
+
+# Reject webhooks whose signed timestamp is older than this (seconds) to
+# prevent replay of a previously captured, validly-signed request.
+_WEBHOOK_TOLERANCE_SECONDS = int(os.environ.get("TELNYX_WEBHOOK_TOLERANCE", "300"))
 
 
 def send_sms(to: str, body: str) -> dict:
@@ -37,12 +37,24 @@ def validate_webhook_signature(
     timestamp: str,
     signature: str,
 ) -> bool:
-    """Validate a Telnyx webhook using Ed25519 signature."""
+    """Validate a Telnyx webhook using Ed25519 signature + timestamp freshness.
+
+    Returns False if the signature is invalid OR the timestamp is missing,
+    malformed, or older than the configured tolerance (replay protection).
+    """
+    # Reject stale (or future-dated) timestamps before doing crypto work.
+    try:
+        ts = int(timestamp)
+    except (TypeError, ValueError):
+        return False
+    age = abs(time.time() - ts)
+    if age > _WEBHOOK_TOLERANCE_SECONDS:
+        return False
+
     # Telnyx signs: timestamp + "|" + raw_body
     signed_payload = f"{timestamp}|".encode() + payload
     try:
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-        from cryptography.hazmat.primitives.serialization import load_pem_public_key
         import base64
 
         public_key_bytes = base64.b64decode(_TELNYX_PUBLIC_KEY)

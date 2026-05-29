@@ -64,7 +64,7 @@ def handle(req: func.HttpRequest) -> func.HttpResponse:
 
 def _handle_director_update(phone: str, text: str) -> None:
     """Store the director's message as the current ETA update."""
-    eta = location_service.set_eta(message=text)
+    location_service.set_eta(message=text)
     telnyx_service.send_sms(phone, "ETA update saved. Parents can now query it.")
 
 

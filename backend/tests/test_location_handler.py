@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import azure.functions as func
-import pytest
 
 import handlers.location_handler as location_handler
 

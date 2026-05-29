@@ -1,3 +1,4 @@
+import hmac
 import json
 import logging
 import os
@@ -5,6 +6,7 @@ import os
 import azure.functions as func
 
 import services.schedule_service as schedule_service
+import services.validators as validators
 from models.event import ScheduleEvent
 
 logger = logging.getLogger(__name__)
@@ -14,7 +16,8 @@ _ADMIN_KEY = os.environ.get("ADMIN_API_KEY", "")
 
 def _is_authorized(req: func.HttpRequest) -> bool:
     provided = req.headers.get("X-Admin-Key", "")
-    return bool(_ADMIN_KEY) and provided == _ADMIN_KEY
+    # Constant-time comparison to avoid leaking the key via timing.
+    return bool(_ADMIN_KEY) and hmac.compare_digest(provided, _ADMIN_KEY)
 
 
 def handle_events(req: func.HttpRequest) -> func.HttpResponse:
@@ -60,6 +63,14 @@ def _upsert_event(req: func.HttpRequest) -> func.HttpResponse:
     if missing:
         return func.HttpResponse(
             json.dumps({"error": f"Missing fields: {missing}"}),
+            status_code=400,
+            mimetype="application/json",
+        )
+
+    format_errors = validators.validate_event(body)
+    if format_errors:
+        return func.HttpResponse(
+            json.dumps({"error": "Validation failed", "details": format_errors}),
             status_code=400,
             mimetype="application/json",
         )

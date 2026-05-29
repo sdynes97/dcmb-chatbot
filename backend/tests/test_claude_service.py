@@ -3,8 +3,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 import services.claude_service as claude_service
-from models.event import ScheduleEvent
-from models.location_update import ETAUpdate
 
 
 @pytest.fixture(autouse=True)
@@ -60,7 +58,7 @@ def test_get_reply_no_events():
         instance.messages.create.return_value = _mock_response("No events scheduled.")
         claude_service._client = instance
 
-        reply = claude_service.get_reply(
+        claude_service.get_reply(
             message="What's next?",
             events=[],
             eta=None,

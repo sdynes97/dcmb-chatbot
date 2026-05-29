@@ -6,7 +6,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import azure.functions as func
-import pytest
 
 import function_app
 

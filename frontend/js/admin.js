@@ -6,6 +6,14 @@ function authHeaders() {
   return { "Content-Type": "application/json", "X-Admin-Key": apiKey };
 }
 
+// Escape untrusted strings before inserting into innerHTML (defense-in-depth
+// against stored XSS — event data is admin-written but never trust it blindly).
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 function saveKey(key) {
   if (document.getElementById("remember-me").checked) {
     localStorage.setItem("dcmb_admin_key", key);
@@ -128,20 +136,31 @@ function renderDesktopTable(events) {
   }
   tbody.innerHTML = events.map((ev) => `
     <tr>
-      <td>${ev.event_date}</td>
-      <td>${ev.event_name}</td>
-      <td>${ev.event_type.replace("_", " ")}</td>
-      <td>${ev.call_time}</td>
-      <td>${ev.performance_time}</td>
-      <td>${ev.estimated_return}</td>
+      <td>${esc(ev.event_date)}</td>
+      <td>${esc(ev.event_name)}</td>
+      <td>${esc(ev.event_type.replace("_", " "))}</td>
+      <td>${esc(ev.call_time)}</td>
+      <td>${esc(ev.performance_time)}</td>
+      <td>${esc(ev.estimated_return)}</td>
       <td>${ev.is_away ? "✈ Away" : "Home"}</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="editEvent(${JSON.stringify(JSON.stringify(ev))})">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteEvent('${ev.partition_key}','${ev.row_key}')">Delete</button>
+        <button class="btn btn-outline btn-sm" data-action="edit" data-rk="${esc(ev.row_key)}">Edit</button>
+        <button class="btn btn-danger btn-sm" data-action="delete" data-rk="${esc(ev.row_key)}">Delete</button>
       </td>
     </tr>
   `).join("");
 }
+
+// Delegated listener — looks events up by row_key from _allEvents, so no
+// untrusted data is interpolated into inline handlers.
+document.getElementById("events-tbody").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const ev = _allEvents.find((x) => x.row_key === btn.dataset.rk);
+  if (!ev) return;
+  if (btn.dataset.action === "edit") editEvent(ev);
+  else if (btn.dataset.action === "delete") deleteEvent(ev.partition_key, ev.row_key);
+});
 
 // ── Mobile event cards ────────────────────────────────────────────────────────
 
@@ -153,11 +172,11 @@ function renderMobileCards(events) {
     return;
   }
   container.innerHTML = upcoming.map((ev) => `
-    <div class="event-card" id="mobile-card-${ev.row_key}">
+    <div class="event-card" id="mobile-card-${esc(ev.row_key)}">
       <div class="event-card-header">
         <div>
-          <div class="event-card-title">${ev.event_name}</div>
-          <div class="event-card-date">${formatDate(ev.event_date)}</div>
+          <div class="event-card-title">${esc(ev.event_name)}</div>
+          <div class="event-card-date">${esc(formatDate(ev.event_date))}</div>
         </div>
         <span class="event-card-badge ${ev.is_away ? "away" : ""}">
           ${ev.is_away ? "✈ Away" : "Home"}
@@ -166,25 +185,24 @@ function renderMobileCards(events) {
       <div class="times-row">
         <div>
           <label>Call Time</label>
-          <input type="time" id="m-call-${ev.row_key}" value="${ev.call_time}" />
+          <input type="time" id="m-call-${esc(ev.row_key)}" value="${esc(ev.call_time)}" />
         </div>
         <div>
           <label>Performance</label>
-          <input type="time" id="m-perf-${ev.row_key}" value="${ev.performance_time}" />
+          <input type="time" id="m-perf-${esc(ev.row_key)}" value="${esc(ev.performance_time)}" />
         </div>
         <div>
           <label>Est. Return</label>
-          <input type="time" id="m-return-${ev.row_key}" value="${ev.estimated_return}" />
+          <input type="time" id="m-return-${esc(ev.row_key)}" value="${esc(ev.estimated_return)}" />
         </div>
       </div>
       <div>
         <label>Notes</label>
-        <input type="text" id="m-notes-${ev.row_key}" value="${ev.notes || ""}"
+        <input type="text" id="m-notes-${esc(ev.row_key)}" value="${esc(ev.notes || "")}"
           placeholder="Optional note for parents…" style="margin-bottom:0" />
       </div>
       <div class="event-card-actions">
-        <button class="btn btn-primary btn-sm"
-          onclick="saveMobileCard(${JSON.stringify(JSON.stringify(ev))})">
+        <button class="btn btn-primary btn-sm" data-action="save-mobile" data-rk="${esc(ev.row_key)}">
           Save Changes
         </button>
       </div>
@@ -192,9 +210,14 @@ function renderMobileCards(events) {
   `).join("");
 }
 
-async function saveMobileCard(evJson) {
-  const ev = JSON.parse(evJson);
-  const rk = ev.row_key;
+document.getElementById("mobile-events-list").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-action='save-mobile']");
+  if (btn) saveMobileCard(btn.dataset.rk);
+});
+
+async function saveMobileCard(rk) {
+  const ev = _allEvents.find((x) => x.row_key === rk);
+  if (!ev) return;
   const updated = {
     ...ev,
     call_time:         document.getElementById(`m-call-${rk}`).value,
@@ -223,8 +246,7 @@ async function saveMobileCard(evJson) {
 
 // ── Desktop add / edit form ───────────────────────────────────────────────────
 
-function editEvent(evJson) {
-  const ev = JSON.parse(evJson);
+function editEvent(ev) {
   const fields = [
     "event_name", "event_type", "event_date", "call_time",
     "performance_time", "estimated_return", "location_name",

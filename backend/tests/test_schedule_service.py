@@ -1,8 +1,7 @@
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 import pytest
 
 import services.schedule_service as schedule_service
-from models.event import ScheduleEvent
 
 
 @pytest.fixture(autouse=True)

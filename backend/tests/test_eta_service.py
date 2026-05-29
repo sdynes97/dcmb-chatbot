@@ -1,4 +1,3 @@
-import pytest
 from services.eta_service import haversine_miles, calculate_eta, SCHOOL_LAT, SCHOOL_LNG
 
 
