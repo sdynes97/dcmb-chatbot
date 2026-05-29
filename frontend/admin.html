@@ -6,105 +6,312 @@
   <title>DCMB Admin</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .admin-container { max-width: 900px; margin: 0 auto; padding: 16px; }
-    section { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-    h2 { color: var(--blue); margin-bottom: 16px; font-size: 1.1rem; }
-    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #444; }
-    input[type=text], input[type=time], input[type=date], select, textarea {
-      width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
-      font-size: 0.95rem; margin-bottom: 12px;
+    /* ── Base layout ─────────────────────────────────────────────── */
+    body { background: #f0f4fb; }
+
+    .page { max-width: 960px; margin: 0 auto; padding: 12px 16px 40px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dde3f0;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
     }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    button[type=submit], .btn-primary {
-      background: var(--blue); color: #fff; border: none; border-radius: 6px;
-      padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer;
+
+    h2 {
+      color: var(--blue);
+      font-size: 1rem;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    button[type=submit]:hover, .btn-primary:hover { background: #24509a; }
-    .btn-sm { font-size: 0.8rem; padding: 4px 10px; border-radius: 4px;
-      background: var(--blue); color: #fff; border: none; cursor: pointer; margin-right: 4px; }
-    .btn-sm.danger { background: #c00; }
+
+    /* ── Form controls ───────────────────────────────────────────── */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    input[type=text], input[type=time], input[type=date],
+    input[type=password], select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccd3e8;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      background: #fafbff;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: #fff;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: filter 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { filter: brightness(0.92); }
+    .btn:active { filter: brightness(0.85); }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    .btn-primary  { background: var(--blue); color: #fff; }
+    .btn-gold     { background: var(--gold); color: var(--blue); }
+    .btn-danger   { background: #d93025; color: #fff; }
+    .btn-outline  { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
+    .btn-full     { width: 100%; }
+    .btn-sm       { padding: 6px 12px; font-size: 0.82rem; }
+
+    /* ── Toast messages ──────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transition: transform 0.25s, opacity 0.25s;
+      pointer-events: none;
+      max-width: 90vw;
+      text-align: center;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast.error { background: #c0392b; }
+
+    /* ── Auth card ───────────────────────────────────────────────── */
+    #auth-card { max-width: 420px; margin: 40px auto; }
+    #auth-card h2 { justify-content: center; font-size: 1.2rem; }
+    .auth-subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+      margin: -10px 0 18px;
+    }
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .remember-row input { width: auto; margin: 0; padding: 0; }
+
+    /* ── ETA card ────────────────────────────────────────────────── */
+    .eta-current {
+      background: #f0f7f0;
+      border: 1px solid #b8dfb8;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      color: #1a5c1a;
+    }
+    .eta-current.none { background: #f5f5f5; border-color: #ddd; color: #888; }
+
+    .eta-row { display: flex; gap: 10px; }
+    .eta-row input[type=text] { flex: 1; margin-bottom: 0; }
+
+    /* ── Upcoming events (mobile quick-edit) ─────────────────────── */
+    .event-card {
+      border: 1px solid #e2e8f4;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .event-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .event-card-title { font-weight: 700; font-size: 0.95rem; color: #1a1a2e; }
+    .event-card-date  { font-size: 0.8rem; color: #666; }
+    .event-card-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #e8edf8;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+    .event-card-badge.away { background: #fff3cd; color: #856404; }
+
+    .times-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .times-row label { font-size: 0.72rem; }
+    .times-row input { margin-bottom: 0; padding: 8px 10px; font-size: 0.9rem; }
+
+    .event-card-actions { margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ── Desktop: full schedule table ────────────────────────────── */
+    .desktop-only { display: none; }
+
+    .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th { text-align: left; background: #f0f4fb; padding: 8px; border-bottom: 2px solid #ddd; }
-    td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
-    tr:hover td { background: #f9f9f9; }
-    .msg { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; min-height: 32px; }
-    .msg.success { background: #e6f4ea; color: #1a7a2e; }
-    .msg.error { background: #fde8e8; color: #c00; }
-    #eta-status { font-style: italic; color: #555; margin-bottom: 12px; }
-    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .hidden { display: none; }
+    th {
+      text-align: left;
+      background: #f0f4fb;
+      padding: 8px 10px;
+      border-bottom: 2px solid #dde3f0;
+      white-space: nowrap;
+    }
+    td { padding: 8px 10px; border-bottom: 1px solid #eef0f7; vertical-align: middle; }
+    tr:hover td { background: #f8f9ff; }
+
+    /* ── Add/Edit event form (desktop) ───────────────────────────── */
+    .form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .form-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 16px; }
+    .span-2 { grid-column: span 2; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .checkbox-row input { width: auto; margin: 0; }
+    .checkbox-row label { margin: 0; font-size: 0.9rem; }
+
+    /* ── Logout button ───────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .topbar span { font-size: 0.82rem; color: #666; }
+
+    /* ── Responsive breakpoint ───────────────────────────────────── */
+    @media (min-width: 700px) {
+      .desktop-only { display: block; }
+      .mobile-only  { display: none; }
+      .eta-row input[type=time] { width: 140px; flex: none; }
+    }
+
+    @media (max-width: 699px) {
+      .times-row { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
 <body>
   <header>
     <div>
       <h1>DCMB Admin</h1>
-      <p>Manage schedule &amp; ETA updates</p>
+      <p>Directors only — schedule &amp; ETA management</p>
     </div>
   </header>
 
-  <div class="admin-container">
-    <div id="message" class="msg"></div>
+  <div class="page">
 
-    <!-- Auth -->
-    <section id="auth-section">
-      <h2>Sign In</h2>
-      <form id="auth-form">
-        <label for="api-key">Admin API Key</label>
-        <input type="text" id="api-key" placeholder="Paste your admin key here" required />
-        <button type="submit" class="btn-primary">Sign In</button>
+    <!-- ── Auth ─────────────────────────────────────────────────── -->
+    <div class="card" id="auth-card">
+      <h2>🔐 Sign In</h2>
+      <p class="auth-subtitle">Enter your director access key</p>
+      <form id="auth-form" autocomplete="off">
+        <label for="api-key">Access Key</label>
+        <input type="password" id="api-key" placeholder="Paste your key here" required />
+        <div class="remember-row">
+          <input type="checkbox" id="remember-me" checked />
+          <label for="remember-me">Remember me on this device</label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
       </form>
-    </section>
+    </div>
 
-    <div id="admin-section" style="display:none">
+    <!-- ── Authenticated content ─────────────────────────────────── -->
+    <div id="admin-content" style="display:none">
 
-      <!-- ETA Update -->
-      <section>
-        <h2>Director ETA Update</h2>
-        <p id="eta-status">Loading…</p>
+      <div class="topbar">
+        <span>Signed in as director</span>
+        <button class="btn btn-outline btn-sm" id="logout-btn">Sign Out</button>
+      </div>
+
+      <!-- ETA Update — prominent on both mobile and desktop -->
+      <div class="card">
+        <h2>🚌 Bus ETA Update</h2>
+        <div id="eta-current" class="eta-current none">No ETA update set</div>
         <form id="eta-form">
-          <label for="eta_message">ETA Message</label>
+          <label for="eta_message">Update Message</label>
           <input type="text" id="eta_message" name="eta_message"
-            placeholder="e.g. Leaving Lincoln now, home ~10:30pm" required />
-          <label for="eta_time">Estimated Arrival Time (optional)</label>
-          <input type="time" id="eta_time" name="eta_time" />
-          <div style="display:flex; gap:10px;">
-            <button type="submit" class="btn-primary">Post Update</button>
-            <button type="button" id="clear-eta-btn" class="btn-sm danger" style="font-size:0.9rem; padding:8px 14px;">
-              Clear ETA
-            </button>
+            placeholder="e.g. Leaving Lincoln now, home ~10:30pm"
+            autocomplete="off" required />
+          <label for="eta_time">Estimated Arrival (optional)</label>
+          <div class="eta-row">
+            <input type="time" id="eta_time" name="eta_time" />
+            <button type="submit" class="btn btn-gold">Post Update</button>
           </div>
         </form>
-      </section>
+        <div style="margin-top:12px">
+          <button id="clear-eta-btn" class="btn btn-outline btn-sm">Clear ETA</button>
+        </div>
+      </div>
 
-      <!-- Schedule Events Table -->
-      <section>
-        <h2>Schedule Events</h2>
-        <div style="overflow-x:auto;">
+      <!-- Upcoming events — mobile quick-edit view -->
+      <div class="card mobile-only">
+        <h2>📅 Upcoming Events</h2>
+        <p style="font-size:0.82rem;color:#666;margin-bottom:12px">
+          Tap an event to update its times. Add new events from a desktop.
+        </p>
+        <div id="mobile-events-list">
+          <p style="color:#aaa;font-size:0.9rem">Loading…</p>
+        </div>
+      </div>
+
+      <!-- Full schedule table — desktop only -->
+      <div class="card desktop-only">
+        <h2>📅 Schedule</h2>
+        <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Date</th><th>Event</th><th>Type</th><th>Call</th>
-                <th>Perf.</th><th>Return</th><th>Location</th><th>Actions</th>
+                <th>Date</th><th>Event</th><th>Type</th>
+                <th>Call</th><th>Perf.</th><th>Return</th>
+                <th>Away?</th><th>Actions</th>
               </tr>
             </thead>
-            <tbody id="events-tbody"></tbody>
+            <tbody id="events-tbody">
+              <tr><td colspan="8" style="color:#aaa">Loading…</td></tr>
+            </tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-      <!-- Add / Edit Event -->
-      <section>
-        <h2>Add / Edit Event</h2>
+      <!-- Add / Edit event form — desktop only -->
+      <div class="card desktop-only" id="event-form-card">
+        <h2 id="event-form-title">➕ Add Event</h2>
         <form id="event-form">
           <input type="hidden" id="partition_key" name="partition_key" />
-          <input type="hidden" id="row_key" name="row_key" />
+          <input type="hidden" id="row_key"       name="row_key" />
 
-          <div class="form-row">
+          <div class="form-2col">
             <div>
               <label for="event_name">Event Name</label>
-              <input type="text" id="event_name" name="event_name" placeholder="Home vs. Lincoln" required />
+              <input type="text" id="event_name" name="event_name"
+                placeholder="Home vs. Lincoln" required />
             </div>
             <div>
               <label for="event_type">Type</label>
@@ -118,7 +325,7 @@
             </div>
           </div>
 
-          <div class="form-row-3">
+          <div class="form-3col">
             <div>
               <label for="event_date">Date</label>
               <input type="date" id="event_date" name="event_date" required />
@@ -133,14 +340,15 @@
             </div>
           </div>
 
-          <div class="form-row">
+          <div class="form-2col">
             <div>
               <label for="estimated_return">Estimated Return</label>
               <input type="time" id="estimated_return" name="estimated_return" required />
             </div>
             <div>
               <label for="location_name">Venue Name</label>
-              <input type="text" id="location_name" name="location_name" placeholder="Brady Street Stadium" required />
+              <input type="text" id="location_name" name="location_name"
+                placeholder="Brady Street Stadium" required />
             </div>
           </div>
 
@@ -153,21 +361,26 @@
             placeholder="Band Room Parking Lot, Door 7" required />
 
           <label for="notes">Notes (optional)</label>
-          <textarea id="notes" name="notes" rows="2" placeholder="Full uniform, bring water…"></textarea>
+          <textarea id="notes" name="notes" rows="2"
+            placeholder="Full uniform required, bring water…"></textarea>
 
           <div class="checkbox-row">
             <input type="checkbox" id="is_away" name="is_away" />
-            <label for="is_away" style="margin:0">Away event (bus travel required)</label>
+            <label for="is_away">Away event (bus travel required)</label>
           </div>
 
-          <button type="submit">Save Event</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="submit" class="btn btn-primary" id="save-event-btn">Save Event</button>
+            <button type="button" class="btn btn-outline" id="cancel-edit-btn"
+              style="display:none" onclick="cancelEdit()">Cancel</button>
+          </div>
         </form>
-      </section>
+      </div>
 
-    </div><!-- /admin-section -->
-  </div>
+    </div><!-- /admin-content -->
+  </div><!-- /page -->
 
-  <footer>DCMB Admin &mdash; Davenport Central Marching Band</footer>
+  <div id="toast"></div>
 
   <script src="js/config.js"></script>
   <script src="js/admin.js"></script>
