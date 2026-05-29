@@ -5,6 +5,8 @@
 
 // Mock the DOM elements that chat.js expects
 beforeEach(() => {
+  // Force chat.js to re-run its top-level code against the fresh DOM below.
+  vi.resetModules();
   document.body.innerHTML = `
     <div id="chat-window"></div>
     <form id="chat-form">
