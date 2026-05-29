@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DCMB Admin</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .admin-container { max-width: 900px; margin: 0 auto; padding: 16px; }
+    section { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    h2 { color: var(--blue); margin-bottom: 16px; font-size: 1.1rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #444; }
+    input[type=text], input[type=time], input[type=date], select, textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 0.95rem; margin-bottom: 12px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    button[type=submit], .btn-primary {
+      background: var(--blue); color: #fff; border: none; border-radius: 6px;
+      padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer;
+    }
+    button[type=submit]:hover, .btn-primary:hover { background: #24509a; }
+    .btn-sm { font-size: 0.8rem; padding: 4px 10px; border-radius: 4px;
+      background: var(--blue); color: #fff; border: none; cursor: pointer; margin-right: 4px; }
+    .btn-sm.danger { background: #c00; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; background: #f0f4fb; padding: 8px; border-bottom: 2px solid #ddd; }
+    td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    tr:hover td { background: #f9f9f9; }
+    .msg { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; min-height: 32px; }
+    .msg.success { background: #e6f4ea; color: #1a7a2e; }
+    .msg.error { background: #fde8e8; color: #c00; }
+    #eta-status { font-style: italic; color: #555; margin-bottom: 12px; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>DCMB Admin</h1>
+      <p>Manage schedule &amp; ETA updates</p>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    <div id="message" class="msg"></div>
+
+    <!-- Auth -->
+    <section id="auth-section">
+      <h2>Sign In</h2>
+      <form id="auth-form">
+        <label for="api-key">Admin API Key</label>
+        <input type="text" id="api-key" placeholder="Paste your admin key here" required />
+        <button type="submit" class="btn-primary">Sign In</button>
+      </form>
+    </section>
+
+    <div id="admin-section" style="display:none">
+
+      <!-- ETA Update -->
+      <section>
+        <h2>Director ETA Update</h2>
+        <p id="eta-status">Loading…</p>
+        <form id="eta-form">
+          <label for="eta_message">ETA Message</label>
+          <input type="text" id="eta_message" name="eta_message"
+            placeholder="e.g. Leaving Lincoln now, home ~10:30pm" required />
+          <label for="eta_time">Estimated Arrival Time (optional)</label>
+          <input type="time" id="eta_time" name="eta_time" />
+          <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn-primary">Post Update</button>
+            <button type="button" id="clear-eta-btn" class="btn-sm danger" style="font-size:0.9rem; padding:8px 14px;">
+              Clear ETA
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Schedule Events Table -->
+      <section>
+        <h2>Schedule Events</h2>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Event</th><th>Type</th><th>Call</th>
+                <th>Perf.</th><th>Return</th><th>Location</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="events-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Add / Edit Event -->
+      <section>
+        <h2>Add / Edit Event</h2>
+        <form id="event-form">
+          <input type="hidden" id="partition_key" name="partition_key" />
+          <input type="hidden" id="row_key" name="row_key" />
+
+          <div class="form-row">
+            <div>
+              <label for="event_name">Event Name</label>
+              <input type="text" id="event_name" name="event_name" placeholder="Home vs. Lincoln" required />
+            </div>
+            <div>
+              <label for="event_type">Type</label>
+              <select id="event_type" name="event_type">
+                <option value="football_game">Football Game</option>
+                <option value="competition">Competition</option>
+                <option value="parade">Parade</option>
+                <option value="rehearsal">Rehearsal</option>
+                <option value="concert">Concert</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div>
+              <label for="event_date">Date</label>
+              <input type="date" id="event_date" name="event_date" required />
+            </div>
+            <div>
+              <label for="call_time">Call Time</label>
+              <input type="time" id="call_time" name="call_time" required />
+            </div>
+            <div>
+              <label for="performance_time">Performance Time</label>
+              <input type="time" id="performance_time" name="performance_time" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="estimated_return">Estimated Return</label>
+              <input type="time" id="estimated_return" name="estimated_return" required />
+            </div>
+            <div>
+              <label for="location_name">Venue Name</label>
+              <input type="text" id="location_name" name="location_name" placeholder="Brady Street Stadium" required />
+            </div>
+          </div>
+
+          <label for="location_address">Venue Address</label>
+          <input type="text" id="location_address" name="location_address"
+            placeholder="123 Main St, Davenport, IA" required />
+
+          <label for="drop_off_location">Drop-off / Pick-up Location</label>
+          <input type="text" id="drop_off_location" name="drop_off_location"
+            placeholder="Band Room Parking Lot, Door 7" required />
+
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" name="notes" rows="2" placeholder="Full uniform, bring water…"></textarea>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="is_away" name="is_away" />
+            <label for="is_away" style="margin:0">Away event (bus travel required)</label>
+          </div>
+
+          <button type="submit">Save Event</button>
+        </form>
+      </section>
+
+    </div><!-- /admin-section -->
+  </div>
+
+  <footer>DCMB Admin &mdash; Davenport Central Marching Band</footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "dcmb-frontend-tests",
+  "private": true,
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0",
+    "jsdom": "^25.0.0",
+    "@vitest/coverage-v8": "^2.1.0"
+  }
+}

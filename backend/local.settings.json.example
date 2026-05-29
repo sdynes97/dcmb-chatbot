@@ -1,0 +1,16 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "ANTHROPIC_API_KEY": "your-anthropic-api-key",
+    "TELNYX_API_KEY": "your-telnyx-api-key",
+    "TELNYX_PUBLIC_KEY": "your-telnyx-public-key",
+    "TELNYX_PHONE_NUMBER": "+15631234567",
+    "ADMIN_API_KEY": "generate-a-strong-random-key",
+    "DIRECTOR_PHONE": "+15631234567",
+    "FRONTEND_ORIGIN": "https://your-github-username.github.io",
+    "TABLE_STORAGE_TABLE_NAME": "bandschedule"
+  }
+}
