@@ -1,23 +1,21 @@
 # Davenport Central Marching Band Info Bot
 
-A chatbot for DCMB parents to get real-time schedule info, call times, bus drop-off locations, and director ETA updates — via SMS (Telnyx) or the web chat interface (GitHub Pages).
+A mobile-friendly web chatbot for DCMB parents to get real-time schedule info, call times, bus drop-off locations, and director ETA updates — hosted free on GitHub Pages.
 
-**Monthly cost: ~$2** (Telnyx $1.50 + Claude Haiku ~$0.50 + Azure ~$0.03)
+**Monthly cost: ~$0.50** (Claude Haiku ~$0.50 + Azure free tier)
 
 ---
 
 ## Architecture
 
 ```
-Parent (SMS) → Telnyx webhook → Azure Functions → Claude Haiku → SMS reply
-Parent (web) → GitHub Pages  → Azure Functions → Claude Haiku → chat response
-Director     → SMS or admin.html → Azure Functions → Table Storage (ETA)
+Parent (web/mobile) → GitHub Pages → Azure Functions → Claude Haiku → chat response
+Director            → admin.html (web form or live GPS) → Azure Functions → Table Storage (ETA)
 ```
 
 - **Backend:** Python, Azure Functions (consumption plan — free tier)
 - **AI:** Claude claude-haiku-4-5 (Anthropic)
-- **SMS:** Telnyx
-- **Frontend:** Vanilla JS, GitHub Pages
+- **Frontend:** Vanilla JS, GitHub Pages (responsive / mobile-first)
 - **Database:** Azure Table Storage
 
 ---
@@ -41,21 +39,10 @@ Copy `backend/local.settings.json.example` → `backend/local.settings.json` and
 |---|---|
 | `AZURE_STORAGE_CONNECTION_STRING` | Azure Portal → Storage account → Access keys |
 | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
-| `TELNYX_API_KEY` | Telnyx Portal → API Keys |
-| `TELNYX_PUBLIC_KEY` | Telnyx Portal → Webhooks → Ed25519 public key |
-| `TELNYX_PHONE_NUMBER` | E.164 format, e.g. `+15631234567` |
 | `ADMIN_API_KEY` | Generate a random string (e.g. `openssl rand -hex 32`) |
-| `DIRECTOR_PHONE` | Director's cell number in E.164 format |
 | `FRONTEND_ORIGIN` | Your GitHub Pages URL, e.g. `https://yourusername.github.io` |
 
-### 3. Telnyx webhook
-
-In the Telnyx Portal, set your phone number's inbound webhook URL to:
-```
-https://dcmb-chatbot-func.azurewebsites.net/api/sms
-```
-
-### 4. Seed schedule data
+### 3. Seed schedule data
 
 Edit `data/schedule_seed.json` with the real season schedule, then run:
 
@@ -65,7 +52,7 @@ pip install -r requirements.txt
 python ../scripts/seed_table.py
 ```
 
-### 5. GitHub Secrets
+### 4. GitHub Secrets
 
 Add these secrets in GitHub → Settings → Secrets → Actions:
 
@@ -73,15 +60,8 @@ Add these secrets in GitHub → Settings → Secrets → Actions:
 |---|---|
 | `AZURE_CREDENTIALS` | Service principal JSON (see below) |
 | `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Download from Azure Portal → Function App → Get publish profile |
-| `AZURE_STORAGE_CONNECTION_STRING` | Same as local |
-| `AZURE_FUNCTION_BASE_URL` | `https://dcmb-chatbot-func.azurewebsites.net` |
-| `TELNYX_API_KEY` | Same as local |
-| `TELNYX_PUBLIC_KEY` | Same as local |
-| `TELNYX_PHONE_NUMBER` | Same as local |
-| `TELNYX_DISPLAY_NUMBER` | Human-readable, e.g. `(563) 555-0100` |
 | `ANTHROPIC_API_KEY` | Same as local |
 | `ADMIN_API_KEY` | Same as local |
-| `DIRECTOR_PHONE` | Same as local |
 | `FRONTEND_ORIGIN` | GitHub Pages URL |
 
 **Create the service principal:**
@@ -93,7 +73,7 @@ az ad sp create-for-rbac --name "dcmb-chatbot-deploy" `
 ```
 Paste the full JSON output as the `AZURE_CREDENTIALS` secret.
 
-### 6. Provision Azure infrastructure with Terraform
+### 5. Provision Azure infrastructure with Terraform
 
 **One-time: bootstrap the Terraform remote state bucket**
 ```powershell
@@ -115,9 +95,9 @@ terraform plan
 terraform apply
 ```
 
-`terraform output telnyx_webhook_url` gives you the URL to paste into the Telnyx portal.
+`terraform output function_app_url` gives you the backend URL (also injected into the frontend automatically by the deploy workflow).
 
-### 7. GitHub Pages
+### 6. GitHub Pages
 
 In the repo → Settings → Pages → Source: **Deploy from branch** → `gh-pages` / `/ (root)`.
 
@@ -178,9 +158,7 @@ The director has three ways to update the parent-facing ETA:
 
 1. **Live GPS tracking (recommended):** Open `admin.html` on your phone, sign in, and tap **Start Live Tracking**. Your phone's GPS sends your location to the backend every 30 seconds. The ETA auto-calculates as *"Bus is 8.2 mi away, ETA ~10:43 PM"* and updates continuously until you tap Stop.
 
-2. **SMS:** Text the bot number from the registered director phone. The message is saved as the current ETA. Example: `"Leaving Lincoln now, home by 10:30pm"`
-
-3. **Manual web form:** On `admin.html`, expand *"Or post a manual update…"* and type a message.
+2. **Manual web form:** On `admin.html`, expand *"Or post a manual update…"* and type a message.
 
 Parents can ask the bot: *"When are the buses back?"* or *"What's the ETA?"*
 

@@ -28,28 +28,11 @@ def test_get_reply_web(sample_event, sample_eta):
             message="When is the next game?",
             events=[sample_event],
             eta=sample_eta,
-            channel="web",
         )
         assert "Sept 6" in reply
         call_kwargs = instance.messages.create.call_args[1]
         assert call_kwargs["model"] == "claude-haiku-4-5"
         assert "Davenport Central Marching Band" in call_kwargs["system"]
-
-
-def test_get_reply_sms_appends_reminder(sample_event):
-    with patch("anthropic.Anthropic") as MockAnthropic:
-        instance = MockAnthropic.return_value
-        instance.messages.create.return_value = _mock_response("Short reply")
-        claude_service._client = instance
-
-        claude_service.get_reply(
-            message="ETA?",
-            events=[sample_event],
-            eta=None,
-            channel="sms",
-        )
-        system = instance.messages.create.call_args[1]["system"]
-        assert "160 characters" in system
 
 
 def test_get_reply_no_events():
@@ -62,7 +45,6 @@ def test_get_reply_no_events():
             message="What's next?",
             events=[],
             eta=None,
-            channel="web",
         )
         system = instance.messages.create.call_args[1]["system"]
         assert "No events currently scheduled" in system
@@ -74,7 +56,7 @@ def test_schedule_text_included_in_prompt(sample_event):
         instance.messages.create.return_value = _mock_response("...")
         claude_service._client = instance
 
-        claude_service.get_reply("?", [sample_event], None, "web")
+        claude_service.get_reply("?", [sample_event], None)
         system = instance.messages.create.call_args[1]["system"]
         assert "Home vs. Lincoln" in system
         assert "17:30" in system

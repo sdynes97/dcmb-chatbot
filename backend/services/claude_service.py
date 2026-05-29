@@ -16,8 +16,7 @@ Answer questions ONLY using the schedule data and ETA update provided below.
 If the information is not in the data, respond with:
 "I don't have that information — please contact the band director."
 
-For SMS replies, keep your response under 160 characters when possible.
-For web replies, you may be slightly more detailed but stay concise and friendly.
+Keep your responses concise, friendly, and easy to read on a phone.
 
 Current season schedule:
 {schedule_text}
@@ -58,17 +57,12 @@ def get_reply(
     message: str,
     events: List[ScheduleEvent],
     eta: Optional[ETAUpdate],
-    channel: str = "web",  # "sms" or "web"
     conversation_history: Optional[list] = None,
 ) -> str:
     system_prompt = _build_system_prompt(events, eta)
 
     messages = conversation_history or []
     messages = messages + [{"role": "user", "content": message}]
-
-    if channel == "sms":
-        # Append a reminder to keep it short
-        system_prompt += "\n\nIMPORTANT: This is an SMS reply. Keep it under 160 characters."
 
     response = _get_client().messages.create(
         model="claude-haiku-4-5",

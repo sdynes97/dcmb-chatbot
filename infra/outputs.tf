@@ -34,8 +34,3 @@ output "application_insights_connection_string" {
   value       = azurerm_application_insights.main.connection_string
   sensitive   = true
 }
-
-output "telnyx_webhook_url" {
-  description = "Set this as the inbound webhook URL in the Telnyx portal for your phone number"
-  value       = "https://${azurerm_linux_function_app.main.default_hostname}/api/sms"
-}

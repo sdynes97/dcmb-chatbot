@@ -49,15 +49,10 @@ jobs:
           ARM_CLIENT_SECRET:   ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
           ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           ARM_TENANT_ID:       ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
-          TF_VAR_subscription_id:       ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          TF_VAR_anthropic_api_key:     ${{ secrets.ANTHROPIC_API_KEY }}
-          TF_VAR_telnyx_api_key:        ${{ secrets.TELNYX_API_KEY }}
-          TF_VAR_telnyx_public_key:     ${{ secrets.TELNYX_PUBLIC_KEY }}
-          TF_VAR_telnyx_phone_number:   ${{ secrets.TELNYX_PHONE_NUMBER }}
-          TF_VAR_telnyx_display_number: ${{ secrets.TELNYX_DISPLAY_NUMBER }}
-          TF_VAR_admin_api_key:         ${{ secrets.ADMIN_API_KEY }}
-          TF_VAR_director_phone:        ${{ secrets.DIRECTOR_PHONE }}
-          TF_VAR_frontend_origin:       ${{ secrets.FRONTEND_ORIGIN }}
+          TF_VAR_subscription_id:   ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          TF_VAR_anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          TF_VAR_admin_api_key:     ${{ secrets.ADMIN_API_KEY }}
+          TF_VAR_frontend_origin:   ${{ secrets.FRONTEND_ORIGIN }}
 
       - name: Terraform Apply
         working-directory: infra
@@ -123,11 +118,6 @@ jobs:
         run: |
           sed -i "s|http://localhost:7071/api|${{ needs.terraform.outputs.function_app_url }}/api|g" \
             frontend/js/config.js
-
-      - name: Update SMS display number in index.html
-        run: |
-          sed -i "s|(563) 555-0100|${{ secrets.TELNYX_DISPLAY_NUMBER }}|g" \
-            frontend/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

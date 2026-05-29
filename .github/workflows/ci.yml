@@ -33,11 +33,7 @@ jobs:
         run: pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing
         env:
           ANTHROPIC_API_KEY: test-key
-          TELNYX_API_KEY: test-key
-          TELNYX_PUBLIC_KEY: dGVzdC1wdWJsaWMta2V5LWJhc2U2NA==
-          TELNYX_PHONE_NUMBER: "+15550000001"
           ADMIN_API_KEY: test-admin-key
-          DIRECTOR_PHONE: "+15550000099"
           AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true
           TABLE_STORAGE_TABLE_NAME: bandschedule
           FRONTEND_ORIGIN: https://example.github.io

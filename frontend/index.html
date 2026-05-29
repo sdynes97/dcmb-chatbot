@@ -2,40 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
+  <meta name="theme-color" content="#1a3a6e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>DCMB Info Bot</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Davenport Central Marching Band</h1>
-      <p>Schedule &amp; Info Bot</p>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Davenport Central Marching Band</h1>
+        <p>Schedule &amp; Info Bot</p>
+      </div>
+    </header>
+
+    <main>
+      <div id="chat-window"></div>
+    </main>
+
+    <div class="composer">
+      <div id="suggestions" class="suggestions"></div>
+      <form id="chat-form">
+        <input
+          id="chat-input"
+          type="text"
+          placeholder="Ask about schedule, call times, ETA…"
+          autocomplete="off"
+          enterkeyhint="send"
+        />
+        <button id="send-btn" type="submit" aria-label="Send">Send</button>
+      </form>
     </div>
-  </header>
-
-  <div class="sms-tip">
-    You can also text our SMS bot at <strong>(563) 555-0100</strong> — update this number in config
   </div>
-
-  <main>
-    <div id="suggestions" class="suggestions"></div>
-    <div id="chat-window"></div>
-    <form id="chat-form">
-      <input
-        id="chat-input"
-        type="text"
-        placeholder="Ask about schedule, call times, ETA…"
-        autocomplete="off"
-        autofocus
-      />
-      <button id="send-btn" type="submit">Send</button>
-    </form>
-  </main>
-
-  <footer>
-    Davenport Central Marching Band &mdash; Go Blue Devils!
-  </footer>
 
   <script src="js/config.js"></script>
   <script src="js/chat.js"></script>

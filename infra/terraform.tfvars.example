@@ -7,12 +7,12 @@ environment           = "prod"
 app_name              = "dcmb-chatbot"
 
 frontend_origin       = "https://sdynes97.github.io"
-telnyx_phone_number   = "+15631234567"
-telnyx_display_number = "(563) 555-0100"
-director_phone        = "+15631234567"
+
+# Optional ETA tuning (defaults shown)
+# school_lat    = "41.5236"
+# school_lng    = "-90.5776"
+# avg_speed_mph = "35"
 
 # Secrets — keep these safe
 anthropic_api_key  = "sk-ant-..."
-telnyx_api_key     = "KEY..."
-telnyx_public_key  = "..."
 admin_api_key      = "generate-with: openssl rand -hex 32"

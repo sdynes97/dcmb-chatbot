@@ -29,37 +29,10 @@ variable "anthropic_api_key" {
   sensitive   = true
 }
 
-variable "telnyx_api_key" {
-  description = "Telnyx API key for SMS"
-  type        = string
-  sensitive   = true
-}
-
-variable "telnyx_public_key" {
-  description = "Telnyx Ed25519 public key for webhook validation"
-  type        = string
-  sensitive   = true
-}
-
-variable "telnyx_phone_number" {
-  description = "Telnyx phone number in E.164 format, e.g. +15631234567"
-  type        = string
-}
-
-variable "telnyx_display_number" {
-  description = "Human-readable Telnyx number shown in the web UI, e.g. (563) 555-0100"
-  type        = string
-}
-
 variable "admin_api_key" {
   description = "Admin API key for the schedule management endpoints"
   type        = string
   sensitive   = true
-}
-
-variable "director_phone" {
-  description = "Band director's phone in E.164 format — texts from this number become ETA updates"
-  type        = string
 }
 
 variable "school_lat" {

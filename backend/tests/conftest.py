@@ -9,11 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Set environment variables before any module-level code runs
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
-os.environ.setdefault("TELNYX_API_KEY", "test-key")
-os.environ.setdefault("TELNYX_PUBLIC_KEY", "dGVzdC1wdWJsaWMta2V5LWJhc2U2NA==")
-os.environ.setdefault("TELNYX_PHONE_NUMBER", "+15550000001")
 os.environ.setdefault("ADMIN_API_KEY", "test-admin-key")
-os.environ.setdefault("DIRECTOR_PHONE", "+15550000099")
 os.environ.setdefault("AZURE_STORAGE_CONNECTION_STRING", "UseDevelopmentStorage=true")
 os.environ.setdefault("TABLE_STORAGE_TABLE_NAME", "bandschedule")
 os.environ.setdefault("FRONTEND_ORIGIN", "https://example.github.io")
@@ -68,7 +64,3 @@ def mock_claude_service():
         yield m
 
 
-@pytest.fixture
-def mock_telnyx_service():
-    with patch("services.telnyx_service.send_sms", return_value={"data": {"id": "msg-1"}}) as m:
-        yield m

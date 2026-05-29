@@ -1,6 +1,6 @@
 import azure.functions as func
 
-from handlers import chat_handler, sms_handler, admin_handler, location_handler
+from handlers import chat_handler, admin_handler, location_handler
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -8,11 +8,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 @app.route(route="chat", methods=["POST"])
 def chat(req: func.HttpRequest) -> func.HttpResponse:
     return chat_handler.handle(req)
-
-
-@app.route(route="sms", methods=["POST"])
-def sms(req: func.HttpRequest) -> func.HttpResponse:
-    return sms_handler.handle(req)
 
 
 @app.route(route="admin/events", methods=["GET", "POST", "DELETE"])

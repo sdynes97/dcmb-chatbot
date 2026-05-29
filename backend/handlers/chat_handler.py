@@ -64,7 +64,6 @@ def handle(req: func.HttpRequest) -> func.HttpResponse:
             message=message,
             events=events,
             eta=eta,
-            channel="web",
             conversation_history=history,
         )
     except Exception:
