@@ -119,9 +119,9 @@ Azurite is built into the **VS Code Azurite extension** — the easiest option, 
 1. Open VS Code → Extensions → search **Azurite** (publisher: Microsoft) → Install
 2. Open the Command Palette (`Ctrl+Shift+P`) → **Azurite: Start**
 
-⚠️ Make sure the **Table** service is running — it listens on port `10002`. The status bar shows `[Azurite Table Service]` when it's up. If you start Azurite from a terminal instead, `azurite` (no args) starts all three services; `azurite-table` starts just the table service.
+⚠️ Start **all three** Azurite services (Blob `10000`, Queue `10001`, Table `10002`), not just Table. The Functions host's own `AzureWebJobsStorage` uses Blob + Queue — if those aren't running you'll see `azure.functions.webjobs.storage … Unhealthy` (timeout). Your app data lives in the Table service. The VS Code **Azurite: Start** command launches all three; from a terminal, run `azurite` with no args (avoid `azurite-table`, which starts only the table service).
 
-The connection string `UseDevelopmentStorage=true` (already set in `local.settings.json.example`) automatically points the SDK at Azurite's local table endpoint — no account name or key needed.
+The connection string `UseDevelopmentStorage=true` (already set in `local.settings.json.example`) automatically points both the Functions host and the SDK at Azurite's local endpoints — no account name or key needed.
 
 **3. Install Python dependencies**
 ```powershell
