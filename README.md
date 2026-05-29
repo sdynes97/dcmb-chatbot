@@ -85,15 +85,39 @@ Add these secrets in GitHub → Settings → Secrets → Actions:
 | `FRONTEND_ORIGIN` | GitHub Pages URL |
 
 **Create the service principal:**
-```bash
-az ad sp create-for-rbac --name "dcmb-chatbot-deploy" \
-  --role contributor \
-  --scopes /subscriptions/{subscription-id}/resourceGroups/dcmb-chatbot-rg \
+```powershell
+az ad sp create-for-rbac --name "dcmb-chatbot-deploy" `
+  --role contributor `
+  --scopes /subscriptions/{subscription-id}/resourceGroups/dcmb-chatbot-rg `
   --sdk-auth
 ```
 Paste the full JSON output as the `AZURE_CREDENTIALS` secret.
 
-### 6. GitHub Pages
+### 6. Provision Azure infrastructure with Terraform
+
+**One-time: bootstrap the Terraform remote state bucket**
+```powershell
+az login
+.\scripts\bootstrap-tfstate.ps1
+```
+
+**Fill in your values**
+```powershell
+Copy-Item infra\terraform.tfvars.example infra\terraform.tfvars
+notepad infra\terraform.tfvars
+```
+
+**Init, plan, and apply**
+```powershell
+cd infra
+terraform init
+terraform plan
+terraform apply
+```
+
+`terraform output telnyx_webhook_url` gives you the URL to paste into the Telnyx portal.
+
+### 7. GitHub Pages
 
 In the repo → Settings → Pages → Source: **Deploy from branch** → `gh-pages` / `/ (root)`.
 
@@ -101,47 +125,61 @@ In the repo → Settings → Pages → Source: **Deploy from branch** → `gh-pa
 
 ## Local development
 
-```bash
-# Install Azure Functions Core Tools
-npm install -g azure-functions-core-tools@4 --unsafe-perm true
+Open a PowerShell terminal in the repo root.
 
-# Install Azurite (local Table Storage emulator)
+**1. Install Azure Functions Core Tools and Azurite (once)**
+```powershell
+npm install -g azure-functions-core-tools@4
 npm install -g azurite
+```
 
-# Start Azurite in a separate terminal
-azurite --silent --location /tmp/azurite
+**2. Start Azurite (local Table Storage emulator) — keep this terminal open**
+```powershell
+$azuriteData = "$env:TEMP\azurite"
+New-Item -ItemType Directory -Force -Path $azuriteData | Out-Null
+azurite --silent --location $azuriteData
+```
 
-# Install Python dependencies
+**3. Install Python dependencies**
+```powershell
 cd backend
 pip install -r requirements-dev.txt
+```
 
-# Copy and fill in local settings
-cp local.settings.json.example local.settings.json
+**4. Copy and fill in local settings**
+```powershell
+Copy-Item local.settings.json.example local.settings.json
+notepad local.settings.json
+```
 
-# Start the Functions host
+**5. Start the Functions host — open a new terminal tab**
+```powershell
+cd backend
 func start
 ```
 
-Frontend is plain HTML — open `frontend/index.html` in a browser or use Live Server.
+Frontend is plain HTML — open `frontend/index.html` in a browser or use the VS Code Live Server extension.
 
 ---
 
 ## Running tests
 
-```bash
+```powershell
 cd backend
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ---
 
 ## Director ETA updates
 
-The band director can update the parent-facing ETA in two ways:
+The director has three ways to update the parent-facing ETA:
 
-1. **SMS:** Text the bot number from the registered director phone. The message is automatically saved as the current ETA. Example: `"Leaving Lincoln now, home by 10:30pm"`
+1. **Live GPS tracking (recommended):** Open `admin.html` on your phone, sign in, and tap **Start Live Tracking**. Your phone's GPS sends your location to the backend every 30 seconds. The ETA auto-calculates as *"Bus is 8.2 mi away, ETA ~10:43 PM"* and updates continuously until you tap Stop.
 
-2. **Web form:** Go to `https://yourusername.github.io/admin.html`, enter the admin API key, and fill out the ETA form.
+2. **SMS:** Text the bot number from the registered director phone. The message is saved as the current ETA. Example: `"Leaving Lincoln now, home by 10:30pm"`
+
+3. **Manual web form:** On `admin.html`, expand *"Or post a manual update…"* and type a message.
 
 Parents can ask the bot: *"When are the buses back?"* or *"What's the ETA?"*
 
