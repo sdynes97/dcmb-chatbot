@@ -119,7 +119,9 @@ Azurite is built into the **VS Code Azurite extension** — the easiest option, 
 1. Open VS Code → Extensions → search **Azurite** (publisher: Microsoft) → Install
 2. Open the Command Palette (`Ctrl+Shift+P`) → **Azurite: Start**
 
-A status bar item shows `[Azurite Table Service]` when it's running. That's all you need.
+⚠️ Make sure the **Table** service is running — it listens on port `10002`. The status bar shows `[Azurite Table Service]` when it's up. If you start Azurite from a terminal instead, `azurite` (no args) starts all three services; `azurite-table` starts just the table service.
+
+The connection string `UseDevelopmentStorage=true` (already set in `local.settings.json.example`) automatically points the SDK at Azurite's local table endpoint — no account name or key needed.
 
 **3. Install Python dependencies**
 ```powershell
@@ -133,13 +135,31 @@ Copy-Item local.settings.json.example local.settings.json
 notepad local.settings.json
 ```
 
-**5. Start the Functions host — open a new terminal tab**
+**5. Create the `bandschedule` table / seed data (optional)**
+
+You do **not** need to create the table by hand. The app creates it on first
+access — `_get_table_client()` in `schedule_service.py` and `location_service.py`
+calls `create_table()` idempotently, so the first chat query, admin write, or ETA
+update auto-creates an empty `bandschedule` table in Azurite.
+
+To start with real data instead of an empty table, run the seed script (it also
+creates the table):
+```powershell
+cd backend
+python ../scripts/seed_table.py
+```
+
+**6. Start the Functions host — open a new terminal tab**
 ```powershell
 cd backend
 func start
 ```
 
 Frontend is plain HTML — open `frontend/index.html` in a browser or use the VS Code Live Server extension.
+
+> **Note:** `pytest` does not use Azurite — the test suite mocks the table client
+> entirely (see `tests/conftest.py`), so you only need Azurite running to exercise
+> the app end-to-end via `func start`.
 
 ---
 
