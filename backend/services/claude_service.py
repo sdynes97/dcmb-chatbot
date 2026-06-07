@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from typing import List, Optional
 
 import anthropic
@@ -13,6 +14,8 @@ _client: Optional[anthropic.Anthropic] = None
 _SYSTEM_PREFIX = """\
 You are a helpful assistant for the Davenport Central Marching Band.
 Your job is to answer questions from parents about the band's schedule, performances, and logistics.
+
+Today's date is {today}.
 
 Answer questions ONLY using the schedule data and ETA update provided below.
 If the information is not in the data, respond with:
@@ -59,7 +62,7 @@ def _build_system_blocks(
     return [
         {
             "type": "text",
-            "text": _SYSTEM_PREFIX.format(schedule_text=schedule_text),
+            "text": _SYSTEM_PREFIX.format(today=date.today().isoformat(), schedule_text=schedule_text),
             # 1-hour TTL: parent queries during an event window are spread over
             # hours, so the longer TTL keeps the schedule warm between them.
             "cache_control": {"type": "ephemeral", "ttl": "1h"},
