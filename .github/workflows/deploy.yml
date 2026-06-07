@@ -103,7 +103,6 @@ jobs:
         with:
           app-name: ${{ needs.terraform.outputs.function_app_name }}
           package: backend
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
 
   deploy-frontend:
     name: Deploy Frontend to GitHub Pages

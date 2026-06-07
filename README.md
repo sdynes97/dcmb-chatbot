@@ -24,12 +24,34 @@ Director            → admin.html (web form or live GPS) → Azure Functions �
 
 ### 1. Azure resources
 
-Create these in the [Azure Portal](https://portal.azure.com):
+Terraform will create the app resource group and app resources for you. Do not pre-create the app resource group, storage account, or Function App unless you plan to import them into Terraform state.
 
-1. **Resource group:** `dcmb-chatbot-rg`
-2. **Storage account** (LRS, Standard): `dcmbchatbotstorage`
-3. **Function App** (Python 3.12, consumption plan): `dcmb-chatbot-func`
-   - Set all environment variables (see below) in **Configuration → Application settings**
+The only required pre-provisioning is the Terraform remote state backend:
+
+- Resource group: `dcmb-tfstate-rg`
+- Storage account: `dcmbtfstate`
+- Container: `tfstate`
+
+Use the bootstrap script instead of manually creating the backend storage resources:
+
+```powershell
+az login
+.\scripts\bootstrap-tfstate.ps1
+```
+
+If you already created `dcmb-chatbot-rg` manually, import it before running `terraform plan`:
+
+```powershell
+cd infra
+terraform init
+terraform import azurerm_resource_group.main /subscriptions/<subscription-id>/resourceGroups/dcmb-chatbot-rg
+```
+
+If you also manually created the app storage account, import that too:
+
+```powershell
+terraform import azurerm_storage_account.main /subscriptions/<subscription-id>/resourceGroups/dcmb-chatbot-rg/providers/Microsoft.Storage/storageAccounts/dcmbchatbotstorage
+```
 
 ### 2. Environment variables
 
@@ -68,10 +90,20 @@ Add these secrets in GitHub → Settings → Secrets → Actions:
 ```powershell
 az ad sp create-for-rbac --name "dcmb-chatbot-deploy" `
   --role contributor `
-  --scopes /subscriptions/{subscription-id}/resourceGroups/dcmb-chatbot-rg `
+  --scopes /subscriptions/{subscription-id}/resourceGroups/dcmb-chatbot-rg /subscriptions/{subscription-id}/resourceGroups/dcmb-tfstate-rg `
   --sdk-auth
 ```
 Paste the full JSON output as the `AZURE_CREDENTIALS` secret.
+
+> Note: Terraform remote state is stored in a separate resource group and storage account (`dcmb-tfstate-rg` / `dcmbtfstate`). The service principal must have access to both the app resource group and the backend state resource group.
+
+If you already created the SP with only the app RG scope, grant it access to the backend state RG as well:
+```powershell
+az role assignment create `
+  --assignee <service-principal-appId-or-objectId> `
+  --role "Storage Blob Data Contributor" `
+  --scope /subscriptions/{subscription-id}/resourceGroups/dcmb-tfstate-rg
+```
 
 ### 5. Provision Azure infrastructure with Terraform
 

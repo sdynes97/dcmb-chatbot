@@ -39,6 +39,6 @@ __blobstorage__/
 __queuestorage__/
 
 # IDE
-.vscode/
+
 .idea/
 *.swp
