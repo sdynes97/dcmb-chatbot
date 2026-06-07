@@ -1,10 +1,10 @@
 [
   {
-    "partition_key": "2025",
-    "row_key": "2025-08-22_rehearsal-band-camp",
+    "partition_key": "2026",
+    "row_key": "2026-08-22_rehearsal-band-camp",
     "event_type": "rehearsal",
     "event_name": "Band Camp — First Day",
-    "event_date": "2025-08-22",
+    "event_date": "2026-08-22",
     "call_time": "08:00",
     "performance_time": "N/A",
     "estimated_return": "17:00",
@@ -12,14 +12,14 @@
     "location_address": "1120 Main St, Davenport, IA 52803",
     "drop_off_location": "Band Room, Door 7 (Main Street entrance)",
     "is_away": false,
-    "notes": "Full band camp runs Aug 22–29. Bring water, sunscreen, and lunch."
+    "notes": "Full band camp runs Aug 22–29, 2026. Bring water, sunscreen, and lunch."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-09-05_football-home-1",
+    "partition_key": "2026",
+    "row_key": "2026-09-05_football-home-1",
     "event_type": "football_game",
     "event_name": "Home Game vs. North",
-    "event_date": "2025-09-05",
+    "event_date": "2026-09-05",
     "call_time": "17:30",
     "performance_time": "19:00",
     "estimated_return": "22:00",
@@ -30,11 +30,11 @@
     "notes": "Full uniform required. Pre-game show at 6:45pm."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-09-12_football-away-1",
+    "partition_key": "2026",
+    "row_key": "2026-09-12_football-away-1",
     "event_type": "football_game",
     "event_name": "Away Game at Bettendorf",
-    "event_date": "2025-09-12",
+    "event_date": "2026-09-12",
     "call_time": "17:00",
     "performance_time": "19:00",
     "estimated_return": "23:00",
@@ -45,11 +45,11 @@
     "notes": "Buses leave at 5:30pm. Estimated return 11pm — may vary."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-09-20_competition-davenport",
+    "partition_key": "2026",
+    "row_key": "2026-09-20_competition-davenport",
     "event_type": "competition",
     "event_name": "Davenport Invitational Marching Contest",
-    "event_date": "2025-09-20",
+    "event_date": "2026-09-20",
     "call_time": "12:00",
     "performance_time": "15:30",
     "estimated_return": "20:00",
@@ -60,11 +60,11 @@
     "notes": "Home contest — families welcome to watch. Awards ceremony at 7pm."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-09-26_football-home-2",
+    "partition_key": "2026",
+    "row_key": "2026-09-26_football-home-2",
     "event_type": "football_game",
     "event_name": "Home Game vs. Moline (Homecoming)",
-    "event_date": "2025-09-26",
+    "event_date": "2026-09-26",
     "call_time": "17:00",
     "performance_time": "19:00",
     "estimated_return": "22:00",
@@ -75,11 +75,11 @@
     "notes": "Homecoming game. Parade at 5pm on Main Street before the game."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-10-04_competition-away-1",
+    "partition_key": "2026",
+    "row_key": "2026-10-04_competition-away-1",
     "event_type": "competition",
     "event_name": "Iowa Bandmasters Association Regional",
-    "event_date": "2025-10-04",
+    "event_date": "2026-10-04",
     "call_time": "10:00",
     "performance_time": "14:15",
     "estimated_return": "20:00",
@@ -90,11 +90,11 @@
     "notes": "Buses depart at 10:30am. Bring money for concessions. Results posted ~6pm."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-10-10_football-away-2",
+    "partition_key": "2026",
+    "row_key": "2026-10-10_football-away-2",
     "event_type": "football_game",
     "event_name": "Away Game at Rock Island",
-    "event_date": "2025-10-10",
+    "event_date": "2026-10-10",
     "call_time": "17:00",
     "performance_time": "19:00",
     "estimated_return": "23:00",
@@ -105,11 +105,11 @@
     "notes": "Short drive. Buses leave 5:30pm."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-10-18_competition-state",
+    "partition_key": "2026",
+    "row_key": "2026-10-18_competition-state",
     "event_type": "competition",
     "event_name": "IHSMA Marching Band State Contest",
-    "event_date": "2025-10-18",
+    "event_date": "2026-10-18",
     "call_time": "08:00",
     "performance_time": "13:00",
     "estimated_return": "21:00",
@@ -120,11 +120,11 @@
     "notes": "State contest! Early call time. Buses depart 8:30am. Families encouraged to attend."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-10-24_football-home-3",
+    "partition_key": "2026",
+    "row_key": "2026-10-24_football-home-3",
     "event_type": "football_game",
     "event_name": "Home Game vs. Dubuque Senior (Senior Night)",
-    "event_date": "2025-10-24",
+    "event_date": "2026-10-24",
     "call_time": "17:00",
     "performance_time": "19:00",
     "estimated_return": "22:00",
@@ -135,11 +135,11 @@
     "notes": "Senior Night for band members. Senior recognition ceremony at halftime."
   },
   {
-    "partition_key": "2025",
-    "row_key": "2025-11-14_concert-fall",
+    "partition_key": "2026",
+    "row_key": "2026-11-14_concert-fall",
     "event_type": "concert",
     "event_name": "Fall Band Concert",
-    "event_date": "2025-11-14",
+    "event_date": "2026-11-14",
     "call_time": "18:30",
     "performance_time": "19:00",
     "estimated_return": "21:00",

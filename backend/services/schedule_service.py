@@ -1,4 +1,5 @@
 import os
+import time
 from typing import List, Optional
 
 from azure.data.tables import TableServiceClient
@@ -9,8 +10,10 @@ from models.event import ScheduleEvent
 _TABLE_NAME = os.environ.get("TABLE_STORAGE_TABLE_NAME", "bandschedule")
 _CONN_STR = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
 
-# Simple module-level cache — lives as long as the Function instance
+_CACHE_TTL_SECONDS = 300  # 5 minutes
+
 _cache: Optional[List[ScheduleEvent]] = None
+_cache_ts: float = 0.0
 
 
 def _get_table_client():
@@ -23,8 +26,8 @@ def _get_table_client():
 
 
 def get_all_events(season: Optional[str] = None) -> List[ScheduleEvent]:
-    global _cache
-    if _cache is not None:
+    global _cache, _cache_ts
+    if _cache is not None and (time.monotonic() - _cache_ts) < _CACHE_TTL_SECONDS:
         return _cache
 
     client = _get_table_client()
@@ -37,6 +40,7 @@ def get_all_events(season: Optional[str] = None) -> List[ScheduleEvent]:
               if e.get("PartitionKey") != "eta"]
     events.sort(key=lambda e: (e.event_date, e.call_time))
     _cache = events
+    _cache_ts = time.monotonic()
     return events
 
 
@@ -64,5 +68,6 @@ def get_event(partition_key: str, row_key: str) -> Optional[ScheduleEvent]:
 
 
 def invalidate_cache() -> None:
-    global _cache
+    global _cache, _cache_ts
     _cache = None
+    _cache_ts = 0.0
