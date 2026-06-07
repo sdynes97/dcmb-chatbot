@@ -71,6 +71,7 @@ resource "azurerm_linux_function_app" "main" {
   storage_account_name       = azurerm_storage_account.main.name
   storage_account_access_key = azurerm_storage_account.main.primary_access_key
   https_only                 = true
+  webdeploy_publish_basic_authentication_enabled = true
   tags                       = local.common_tags
 
   site_config {

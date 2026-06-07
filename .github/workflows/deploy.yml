@@ -100,12 +100,11 @@ jobs:
             --exclude ".pytest_cache/*" \
             --exclude "local.settings.json"
           cd ..
-          az functionapp deploy \
+          az functionapp deployment source config-zip \
             --resource-group dcmb-chatbot-rg \
             --name ${{ needs.terraform.outputs.function_app_name }} \
-            --src-path deploy.zip \
-            --type zip \
-            --async false
+            --src deploy.zip \
+            --build-remote true
 
   deploy-frontend:
     name: Deploy Frontend to GitHub Pages
