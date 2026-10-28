@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "TABLE_NAME": "volunteercheckins",
+    "ADMIN_API_KEY": "generate-a-strong-random-key",
+    "KIOSK_API_KEY": "",
+    "KIOSK_TIMEZONE": "America/Chicago"
+  },
+  "Host": {
+    "CORS": "*"
+  }
+}
