@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <!-- Add to Home Screen on iPad → launches full-screen with no Safari chrome -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Check-In" />
+  <title>Volunteer Check-In</title>
+  <link rel="stylesheet" href="css/kiosk.css" />
+</head>
+<body>
+
+  <!-- ── Home ──────────────────────────────────────────────────── -->
+  <section id="screen-home" class="screen active">
+    <div class="home-inner">
+      <div class="home-logo">🙋</div>
+      <h1 id="org-name">Welcome!</h1>
+      <p class="home-sub">Volunteer Check-In</p>
+      <div id="home-clock" class="home-clock"></div>
+      <div id="home-activity" class="home-activity"></div>
+      <button id="start-btn" class="big-btn">Tap here to check in</button>
+      <div id="sync-status" class="sync-status"></div>
+    </div>
+  </section>
+
+  <!-- ── Find your name ────────────────────────────────────────── -->
+  <section id="screen-names" class="screen">
+    <header class="kiosk-header">
+      <button class="back-btn" data-go="home">‹ Back</button>
+      <h2>Find your name</h2>
+      <span class="header-spacer"></span>
+    </header>
+    <div class="search-row">
+      <input type="search" id="name-search" placeholder="Search by name…"
+        autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" />
+    </div>
+    <div id="letter-bar" class="letter-bar"></div>
+    <div id="name-grid" class="name-grid"></div>
+    <div class="names-footer">
+      <button id="walkin-btn" class="link-btn">Not on the list? Tap here</button>
+    </div>
+  </section>
+
+  <!-- ── Walk-in (type your name) ──────────────────────────────── -->
+  <section id="screen-walkin" class="screen">
+    <header class="kiosk-header">
+      <button class="back-btn" data-go="names">‹ Back</button>
+      <h2>Type your name</h2>
+      <span class="header-spacer"></span>
+    </header>
+    <form id="walkin-form" class="walkin-form" autocomplete="off">
+      <input type="text" id="walkin-name" maxlength="80" placeholder="First and last name"
+        autocorrect="off" autocapitalize="words" spellcheck="false" required />
+      <button type="submit" class="big-btn">Continue</button>
+    </form>
+  </section>
+
+  <!-- ── Choose activity ───────────────────────────────────────── -->
+  <section id="screen-activity" class="screen">
+    <header class="kiosk-header">
+      <button class="back-btn" data-go="names">‹ Back</button>
+      <h2 id="activity-title">What are you checking in for?</h2>
+      <span class="header-spacer"></span>
+    </header>
+    <div id="activity-grid" class="activity-grid"></div>
+  </section>
+
+  <!-- ── Welcome ───────────────────────────────────────────────── -->
+  <section id="screen-welcome" class="screen">
+    <div class="welcome-inner">
+      <div class="welcome-check">✓</div>
+      <h1 id="welcome-name">Welcome!</h1>
+      <p id="welcome-detail" class="welcome-detail"></p>
+      <p class="welcome-thanks" id="welcome-thanks">Thank you for volunteering!</p>
+      <button id="done-btn" class="big-btn outline">Done</button>
+    </div>
+  </section>
+
+  <!-- ── Setup / error ─────────────────────────────────────────── -->
+  <section id="screen-error" class="screen">
+    <div class="home-inner">
+      <h1>Check-in is unavailable</h1>
+      <p id="error-detail" class="home-sub"></p>
+      <button id="retry-btn" class="big-btn">Try again</button>
+    </div>
+  </section>
+
+  <script src="js/config.js"></script>
+  <script src="js/kiosk.js"></script>
+</body>
+</html>

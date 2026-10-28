@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.coverage
+
+# Azure Functions local settings (secrets)
+backend/local.settings.json
+
+# Node
+node_modules/
+package-lock.json
+
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+infra/backend.hcl
+infra/*.tfstate*
+
+# Azurite
+__azurite_db_*.json
+__blobstorage__/
+__queuestorage__/
+
+.DS_Store
+Thumbs.db

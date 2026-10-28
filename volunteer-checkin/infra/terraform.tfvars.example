@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in. NEVER commit terraform.tfvars.
+
+subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+location        = "eastus"
+app_name        = "vol-checkin"
+
+# kiosk_timezone     = "America/Chicago"
+# extra_cors_origins = ["https://your-other-app.example.com"]
+
+admin_api_key = "generate with: [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))"
+# kiosk_api_key = "optional — required by the kiosk if set"

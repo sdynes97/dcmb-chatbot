@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volunteer Check-In Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue: #1a3a6e; --gold: #c9a227; }
+    body { background: #f0f4fb; color: #222; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    header { background: var(--blue); color: #fff; padding: 14px 20px; }
+    header h1 { font-size: 1.05rem; font-weight: 700; }
+    header p { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
+    .page { max-width: 960px; margin: 0 auto; padding: 12px 16px 40px; }
+    .card { background: #fff; border: 1px solid #dde3f0; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: var(--blue); font-size: 1rem; margin-bottom: 14px; }
+    p.hint { font-size: 0.82rem; color: #666; margin-bottom: 12px; }
+
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+    input[type=text], input[type=date], input[type=password], input[type=search], select, textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #ccd3e8; border-radius: 8px;
+      font-size: 1rem; margin-bottom: 12px; background: #fafbff; -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); background: #fff; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 18px;
+      border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; }
+    .btn:hover { filter: brightness(0.92); }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-gold    { background: var(--gold); color: var(--blue); }
+    .btn-outline { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
+    .btn-danger  { background: #d93025; color: #fff; }
+    .btn-full    { width: 100%; }
+    .btn-sm      { padding: 6px 12px; font-size: 0.82rem; }
+
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1e293b; color: #fff; padding: 12px 22px; border-radius: 24px; font-size: 0.9rem;
+      z-index: 9999; opacity: 0; transition: transform 0.25s, opacity 0.25s; pointer-events: none; max-width: 90vw; }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast.error { background: #c0392b; }
+
+    #auth-card { max-width: 420px; margin: 40px auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
+    .topbar a, .topbar span { font-size: 0.82rem; color: #666; }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .row > div { flex: 1; min-width: 160px; }
+    .row input, .row select { margin-bottom: 0; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: #e8edf8; color: var(--blue);
+      border-radius: 16px; padding: 6px 6px 6px 12px; font-size: 0.9rem; font-weight: 600; }
+    .chip button { border: none; background: #fff; color: #d93025; border-radius: 50%; width: 22px; height: 22px;
+      cursor: pointer; font-weight: 700; line-height: 1; }
+
+    .kiosk-link { font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; word-break: break-all;
+      background: #f5f7fc; border: 1px dashed #ccd3e8; border-radius: 8px; padding: 10px; margin: 12px 0; }
+
+    .table-wrap { overflow-x: auto; max-height: 480px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; background: #f0f4fb; padding: 8px 10px; border-bottom: 2px solid #dde3f0;
+      white-space: nowrap; position: sticky; top: 0; }
+    td { padding: 8px 10px; border-bottom: 1px solid #eef0f7; vertical-align: middle; }
+    .count { font-size: 0.82rem; color: #666; margin: 10px 0; }
+    .tag { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #fff3cd; color: #856404; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 id="org-title">Volunteer Check-In</h1>
+      <p>Admin — names, activities &amp; check-in log</p>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <div class="card" id="auth-card">
+      <h2>🔐 Sign In</h2>
+      <form id="auth-form" autocomplete="off">
+        <label for="api-key">Director Access Key</label>
+        <input type="password" id="api-key" placeholder="Paste your key here" required />
+        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+      </form>
+    </div>
+
+    <div id="vol-content" style="display:none">
+
+      <div class="topbar">
+        <a href="index.html" target="_blank" rel="noopener">Open kiosk ↗</a>
+        <button class="btn btn-outline btn-sm" id="logout-btn">Sign Out</button>
+      </div>
+
+      <!-- Check-in log + export -->
+      <div class="card">
+        <h2>📋 Check-In Log</h2>
+        <div class="row">
+          <div><label for="log-from">From</label><input type="date" id="log-from" /></div>
+          <div><label for="log-to">To</label><input type="date" id="log-to" /></div>
+          <button class="btn btn-primary" id="log-load-btn">Show</button>
+          <button class="btn btn-gold" id="log-csv-btn">⬇ Download spreadsheet (CSV)</button>
+        </div>
+        <p class="count" id="log-count"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Time</th><th>Name</th><th>Checked in for</th><th></th></tr></thead>
+            <tbody id="log-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Activities -->
+      <div class="card">
+        <h2>🏷️ What volunteers check in for</h2>
+        <p class="hint">
+          e.g. Concessions, Pit Crew, Uniforms, Chaperone. With none, check-ins are recorded as “General”.
+          With one, the kiosk skips the question.
+        </p>
+        <form id="activity-form" class="row" autocomplete="off">
+          <div><input type="text" id="activity-name" maxlength="80" placeholder="New activity name" required /></div>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+        <div class="chips" id="activity-list" style="margin-top:14px"></div>
+      </div>
+
+      <!-- Roster -->
+      <div class="card">
+        <h2>👥 Volunteer Names</h2>
+        <p class="hint">Paste one name per line (e.g. copied from a spreadsheet column). Duplicates are skipped.</p>
+        <form id="roster-form" autocomplete="off">
+          <textarea id="roster-names" rows="4" placeholder="Jane Smith&#10;John Doe"></textarea>
+          <button type="submit" class="btn btn-primary">Add names</button>
+        </form>
+        <input type="search" id="roster-search" placeholder="Filter names…" style="margin-top:16px" />
+        <p class="count" id="roster-count"></p>
+        <div class="table-wrap">
+          <table><tbody id="roster-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- Kiosk link -->
+      <div class="card">
+        <h2>📱 iPad Kiosk Link</h2>
+        <p class="hint">
+          Launch the kiosk from another app with this link. Set a return URL to send people back
+          to that app after the welcome screen. For a standalone iPad, open the link in Safari →
+          Share → <b>Add to Home Screen</b>, then turn on <b>Guided Access</b>.
+        </p>
+        <div class="row">
+          <div>
+            <label for="kiosk-key">Kiosk key (only if KIOSK_API_KEY is set)</label>
+            <input type="password" id="kiosk-key" placeholder="Leave blank if not used" />
+          </div>
+          <div>
+            <label for="kiosk-activity">Lock to one activity (optional)</label>
+            <select id="kiosk-activity"><option value="">Ask each volunteer</option></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="kiosk-return">Return to this URL when done (optional)</label>
+            <input type="text" id="kiosk-return" placeholder="https://your-other-app/kiosk-home" />
+          </div>
+          <div>
+            <label for="kiosk-start">Open on</label>
+            <select id="kiosk-start">
+              <option value="">Kiosk home screen</option>
+              <option value="names">Name list (skip home screen)</option>
+            </select>
+          </div>
+        </div>
+        <div class="kiosk-link" id="kiosk-link"></div>
+        <button class="btn btn-outline btn-sm" id="kiosk-copy-btn">Copy link</button>
+        <a class="btn btn-outline btn-sm" id="kiosk-open-btn" target="_blank" rel="noopener">Open kiosk</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
